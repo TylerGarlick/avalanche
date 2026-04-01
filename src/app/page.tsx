@@ -15,6 +15,7 @@ import {
   RadarChart,
   Legend,
 } from 'recharts';
+import Link from 'next/link';
 import { DANGER_COLORS, DANGER_LABELS, ASPECTS, ELEVATIONS, type UnifiedForecast, type DangerLevel } from '@/lib/types';
 
 interface FilterState {
@@ -197,11 +198,19 @@ export default function Dashboard() {
     <div className="min-h-screen bg-slate-900 text-white">
       {/* Header */}
       <header className="bg-slate-800 border-b border-slate-700 px-6 py-4">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-2xl font-bold text-white">Avalanche Forecast Dashboard</h1>
-          <p className="text-slate-400 text-sm mt-1">
-            Colorado & Utah Avalanche Information
-          </p>
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-white">Avalanche Forecast Dashboard</h1>
+            <p className="text-slate-400 text-sm mt-1">
+              Colorado & Utah Avalanche Information
+            </p>
+          </div>
+          <Link
+            href="/map"
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+          >
+            🗺️ View Map
+          </Link>
         </div>
       </header>
 
