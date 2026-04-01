@@ -4,9 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "bun run scripts/compliance-scan.ts && next build",
+    "build:no-scan": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "self-heal": "bun run scripts/self-heal.ts",
+    "compliance": "bun run scripts/compliance-scan.ts",
+    "pre-deploy-check": "bun run scripts/pre-deploy-check.ts",
+    "deploy": "bun run pre-deploy-check && vercel --yes --prod"
   },
   "dependencies": {
     "@types/leaflet": "^1.9.21",

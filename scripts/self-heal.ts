@@ -8,8 +8,13 @@
 import { exec } from 'child_process';
 import { readFile } from 'fs/promises';
 import { existsSync } from 'fs';
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
 
-const PROJECT_ROOT = import.meta.dir;
+// Get project root - parent of scripts directory
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const PROJECT_ROOT = join(__dirname, '..');
 
 // Autonomy levels - configurable via environment
 const AUTONOMY_LEVEL = process.env.AUTONOMY_LEVEL || 'ask';
