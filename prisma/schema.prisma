@@ -1,0 +1,38 @@
+// Prisma schema for Avalanche Check-In
+// PostgreSQL via Vercel Postgres (Neon under the hood)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model EmergencyContact {
+  id        String   @id @default(nanoid())
+  name      String
+  phone     String
+  email     String?
+  priority  Int      @default(0)
+  userId    String   @default("default")
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([priority])
+}
+
+model CheckIn {
+  id          String   @id @default(nanoid())
+  zoneId      String
+  partnerCode String?
+  checkedInAt DateTime @default(now())
+  expiresAt   DateTime
+  status      String   @default("active") // active | warning | escalated | checked_out | expired
+  escalatedAt DateTime?
+
+  @@index([zoneId])
+  @@index([status])
+  @@index([expiresAt])
+}
