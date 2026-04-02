@@ -8,13 +8,13 @@ export default function EscalationProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const expiredCheckIn = useEscalationCheck();
+  const { isEscalated, checkIn, dismiss } = useEscalationCheck();
 
-  if (expiredCheckIn) {
+  if (isEscalated && checkIn) {
     return (
       <EscalationAlert
-        expiredCheckIn={expiredCheckIn}
-        onResolved={() => window.location.reload()}
+        expiredCheckIn={checkIn}
+        onResolved={dismiss}
       />
     );
   }

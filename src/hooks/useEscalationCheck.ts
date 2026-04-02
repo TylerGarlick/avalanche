@@ -1,54 +1,80 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 
-interface ExpiredCheckIn {
+export interface CheckIn {
   id: string;
-  zoneName: string;
+  zoneId: string;
+  checkedInAt: string;
   expiresAt: string;
+  status: string;
 }
 
-export function useEscalationCheck(): ExpiredCheckIn | null {
-  const [expiredCheckIn, setExpiredCheckIn] = useState<ExpiredCheckIn | null>(null);
+const ESCALATION_THRESHOLD_MS = 30 * 60 * 1000; // 30 minutes past expiry
+const DISMISSAL_KEY = 'escalation-dismissed';
+
+interface UseEscalationCheckReturn {
+  isEscalated: boolean;
+  checkIn: CheckIn | null;
+  dismiss: () => void;
+}
+
+export function useEscalationCheck(): UseEscalationCheckReturn {
+  const [isEscalated, setIsEscalated] = useState(false);
+  const [checkIn, setCheckIn] = useState<CheckIn | null>(null);
 
   useEffect(() => {
-    // Only check on mount
-    const checkEscalation = async () => {
+    async function checkEscalation() {
       try {
-        const res = await fetch('/api/check-in');
+        const res = await fetch('/api/check-in/active');
         if (!res.ok) return;
 
         const data = await res.json();
         if (!data.checkIn) return;
 
-        const checkIn = data.checkIn;
+        const cb: CheckIn = {
+          id: data.checkIn.id,
+          zoneId: data.checkIn.zoneId,
+          checkedInAt: data.checkIn.checkedInAt,
+          expiresAt: data.checkIn.expiresAt,
+          status: data.checkIn.status,
+        };
 
-        // Only alert if status is 'active' and past expiresAt + 30 min
-        if (checkIn.status === 'active') {
-          const expiresAt = new Date(checkIn.expiresAt);
-          const now = new Date();
-          const thirtyMin = 30 * 60 * 1000;
+        setCheckIn(cb);
 
-          if (now.getTime() - expiresAt.getTime() > thirtyMin) {
-            // Get zone name from localStorage or default
-            const zoneName =
-              localStorage.getItem('lastCheckedInZone') ||
-              `Zone ${checkIn.zoneId}`;
+        const expiresAt = new Date(cb.expiresAt).getTime();
+        const now = Date.now();
+        const elapsedPastExpiry = now - expiresAt;
 
-            setExpiredCheckIn({
-              id: checkIn.id,
-              zoneName,
-              expiresAt: checkIn.expiresAt,
-            });
+        if (elapsedPastExpiry < ESCALATION_THRESHOLD_MS) return;
+
+        // Check if dismissed for this check-in
+        const dismissed = localStorage.getItem(DISMISSAL_KEY);
+        if (dismissed) {
+          const { checkInId, timestamp } = JSON.parse(dismissed);
+          if (checkInId === cb.id && now - timestamp < ESCALATION_THRESHOLD_MS * 2) {
+            return;
           }
         }
-      } catch {
-        // Silently fail — not critical
+
+        setIsEscalated(true);
+      } catch (err) {
+        console.error('Escalation check failed:', err);
       }
-    };
+    }
 
     checkEscalation();
   }, []);
 
-  return expiredCheckIn;
+  function dismiss() {
+    if (checkIn) {
+      localStorage.setItem(
+        DISMISSAL_KEY,
+        JSON.stringify({ checkInId: checkIn.id, timestamp: Date.now() })
+      );
+    }
+    setIsEscalated(false);
+  }
+
+  return { isEscalated, checkIn, dismiss };
 }

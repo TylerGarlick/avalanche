@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { DANGER_COLORS, DANGER_LABELS, type UnifiedForecast, type DangerLevel } from '@/lib/types';
@@ -254,8 +254,7 @@ function ZoneDetailsPanel({
   );
 }
 
-// Main Page Component
-export default function MapPageClient() {
+function MapPageContent() {
   const [forecasts, setForecasts] = useState<UnifiedForecast[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -309,7 +308,7 @@ export default function MapPageClient() {
     setSelectedZone(zone);
   }, [searchParams]);
 
-  const handleZoneSelect = (zoneId: string) => {
+  const handleZoneSelect = (zoneId: string | null) => {
     setSelectedZone(zoneId);
   };
 
@@ -406,5 +405,18 @@ export default function MapPageClient() {
         )}
       </div>
     </div>
+  );
+}
+
+// Wrap in Suspense for useSearchParams
+export default function MapPageClient() {
+  return (
+    <Suspense fallback={
+      <div className="h-screen w-full flex flex-col bg-slate-900 items-center justify-center">
+        <div className="text-slate-400 text-xl">Loading...</div>
+      </div>
+    }>
+      <MapPageContent />
+    </Suspense>
   );
 }
