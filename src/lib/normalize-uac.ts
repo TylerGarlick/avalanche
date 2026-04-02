@@ -123,6 +123,7 @@ export function normalizeUAC(data: { advisories: Array<{ advisory: UACAdvisory }
       forecastDiscussion: advisory.bottom_line || advisory.current_conditions || '',
       publishedAt: new Date(parseInt(advisory.date_issued_timestamp, 10) * 1000).toISOString(),
       validDay,
+      epistemic: 'inferred' as const,
     };
   });
 }

@@ -127,6 +127,7 @@ function generateMockCAICData(): UnifiedForecast[] {
     forecastDiscussion: zone.discussion,
     publishedAt: zone.published_at,
     validDay: new Date().toISOString().split('T')[0],
+    epistemic: 'inferred' as const,
   }));
 }
 
