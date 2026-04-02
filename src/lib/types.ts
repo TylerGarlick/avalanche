@@ -9,6 +9,7 @@ export interface UnifiedForecast {
   forecastDiscussion: string;
   publishedAt: string;
   validDay: string;
+  epistemic: 'known' | 'inferred' | 'uncertain';
 }
 
 export interface AvalancheProblem {
