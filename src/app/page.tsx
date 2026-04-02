@@ -4,6 +4,10 @@ import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { DANGER_COLORS, DANGER_LABELS, type UnifiedForecast, type DangerLevel } from '@/lib/types';
+import { FeatureTour } from '@/components/FeatureTour';
+import { useFeatureTour } from '@/hooks/useFeatureTour';
+import { TOUR_STEPS } from '@/components/tour-steps';
+import EpistemicBadge from '@/components/EpistemicBadge';
 
 // Dynamically import Leaflet to avoid SSR issues
 const InteractiveMap = dynamic(
@@ -258,6 +262,30 @@ export default function MapPageClient() {
   const [selectedZone, setSelectedZone] = useState<string | null>(null);
   const searchParams = useSearchParams();
 
+  // Feature Tour
+  const {
+    isActive: isTourActive,
+    currentStep,
+    totalSteps,
+    currentStepData,
+    progress,
+    isFirstStep,
+    isLastStep,
+    next: tourNext,
+    back: tourBack,
+    skip: tourSkip,
+    dismissPermanently: tourDismissPermanently,
+  } = useFeatureTour({
+    steps: TOUR_STEPS,
+    onComplete: () => {
+      console.log('Tour completed');
+    },
+    onSkip: () => {
+      console.log('Tour skipped');
+    },
+    enabled: true,
+  });
+
   // Fetch forecast data
   useEffect(() => {
     async function fetchData() {
@@ -291,6 +319,22 @@ export default function MapPageClient() {
 
   return (
     <div className="h-screen w-full flex flex-col bg-slate-900">
+      {/* Feature Tour */}
+      <FeatureTour
+        steps={TOUR_STEPS}
+        currentStep={currentStep}
+        totalSteps={totalSteps}
+        currentStepData={currentStepData}
+        progress={progress}
+        isFirstStep={isFirstStep}
+        isLastStep={isLastStep}
+        isActive={isTourActive}
+        onNext={tourNext}
+        onBack={tourBack}
+        onSkip={tourSkip}
+        onDismissPermanently={tourDismissPermanently}
+      />
+
       {/* Header */}
       <header className="bg-slate-800 border-b border-slate-700 px-4 py-3 flex items-center justify-between z-10">
         <div className="flex items-center gap-3">
@@ -303,6 +347,13 @@ export default function MapPageClient() {
         </div>
         <div className="flex items-center gap-3">
           <a
+            href="/check-in"
+            className="text-slate-400 hover:text-white text-sm transition-colors"
+            data-tour="check-in"
+          >
+            Check In →
+          </a>
+          <a
             href="/dashboard"
             className="text-slate-400 hover:text-white text-sm transition-colors"
           >
@@ -313,6 +364,13 @@ export default function MapPageClient() {
             className="text-slate-400 hover:text-white text-sm transition-colors"
           >
             No-Go →
+          </a>
+          <a
+            href="/settings"
+            className="text-slate-400 hover:text-white text-sm transition-colors"
+            title="Settings & Feature Tour"
+          >
+            ⚙️
           </a>
         </div>
       </header>
