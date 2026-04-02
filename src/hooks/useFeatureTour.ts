@@ -72,9 +72,13 @@ export function useFeatureTour({
   useEffect(() => {
     if (!enabled || dismissed) return;
     
-    if (forceShow) {
+    const hasVisited = localStorage.getItem('avalanche-tour-visited');
+    if (forceShow || !hasVisited) {
       setIsActive(true);
       setCurrentStep(0);
+      if (!hasVisited) {
+        localStorage.setItem('avalanche-tour-visited', 'true');
+      }
     }
   }, [enabled, dismissed, forceShow]);
 
